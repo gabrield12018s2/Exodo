@@ -11,6 +11,14 @@ export type CommunityRole =
   | "dm"
   | "player";
 
+export interface Profile {
+  id: string;
+  username: string;
+  display_name: string;
+  avatar_url: string | null;
+  bio: string;
+}
+
 export interface Community {
   id: string;
   name: string;
@@ -63,10 +71,11 @@ export interface CommunityMember {
   user_id: string;
   role: CommunityRole;
   joined_at: string;
+  profile: Profile | null;
 }
 
 // ==================================================
-// OBTENER COMUNIDADES DEL USUARIO
+// OBTENER COMUNIDADES
 // ==================================================
 
 export async function getCommunities(): Promise<Community[]> {
@@ -146,7 +155,7 @@ export async function getChannels(
 }
 
 // ==================================================
-// OBTENER MIEMBROS
+// OBTENER MIEMBROS Y SUS PERFILES REALES
 // ==================================================
 
 export async function getCommunityMembers(
@@ -154,14 +163,45 @@ export async function getCommunityMembers(
 ): Promise<CommunityMember[]> {
   const supabase = createClient();
 
-  const { data, error } = await supabase
-    .from("community_members")
-    .select("*")
-    .eq("community_id", communityId);
+  const { data: members, error: membersError } =
+    await supabase
+      .from("community_members")
+      .select("*")
+      .eq("community_id", communityId)
+      .order("joined_at", { ascending: true });
 
-  if (error) throw error;
+  if (membersError) throw membersError;
 
-  return data ?? [];
+  if (!members || members.length === 0) {
+    return [];
+  }
+
+  const userIds = members.map(
+    (member) => member.user_id
+  );
+
+  const { data: profiles, error: profilesError } =
+    await supabase
+      .from("profiles")
+      .select(
+        "id, username, display_name, avatar_url, bio"
+      )
+      .in("id", userIds);
+
+  if (profilesError) throw profilesError;
+
+  const profilesMap = new Map<string, Profile>();
+
+  for (const profile of profiles ?? []) {
+    profilesMap.set(profile.id, profile);
+  }
+
+  return members.map((member) => ({
+    ...member,
+    role: member.role as CommunityRole,
+    profile:
+      profilesMap.get(member.user_id) ?? null,
+  }));
 }
 
 // ==================================================
@@ -192,6 +232,71 @@ export async function getMyRole(
   if (error) throw error;
 
   return data.role as CommunityRole;
+}
+
+// ==================================================
+// OBTENER MI PERFIL
+// ==================================================
+
+export async function getMyProfile(): Promise<Profile> {
+  const supabase = createClient();
+
+  const { data: authData, error: authError } =
+    await supabase.auth.getUser();
+
+  if (authError) throw authError;
+
+  if (!authData.user) {
+    throw new Error("Usuario no autenticado");
+  }
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select(
+      "id, username, display_name, avatar_url, bio"
+    )
+    .eq("id", authData.user.id)
+    .single();
+
+  if (error) throw error;
+
+  return data;
+}
+
+// ==================================================
+// ACTUALIZAR MI PERFIL
+// ==================================================
+
+export async function updateMyProfile(
+  displayName: string,
+  bio: string
+): Promise<void> {
+  const supabase = createClient();
+
+  const { data: authData, error: authError } =
+    await supabase.auth.getUser();
+
+  if (authError) throw authError;
+
+  if (!authData.user) {
+    throw new Error("Usuario no autenticado");
+  }
+
+  const name = displayName.trim();
+
+  if (name.length === 0 || name.length > 80) {
+    throw new Error("Nombre de usuario no válido");
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      display_name: name,
+      bio: bio.trim(),
+    })
+    .eq("id", authData.user.id);
+
+  if (error) throw error;
 }
 
 // ==================================================

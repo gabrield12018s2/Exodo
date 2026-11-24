@@ -1,0 +1,18 @@
+ÉXODO v0.3.1 — bloque administrativo
+
+1. Detén npm run dev (Ctrl+C en su terminal).
+2. Respalda src antes de instalar: Copy-Item src ../exodo-src-backup -Recurse (usa un destino nuevo).
+3. Extrae el ZIP. Copia la carpeta src extraída SOBRE la carpeta src de C:\Users\Gabo\exodo\exodo; acepta combinar carpetas y reemplazar los dos archivos existentes. No borres src original. No sobrescribas .env.local.
+4. Conserva AuthGate, CommunitySelector, InviteModal, ProfileModal, communities.ts y globals.css actuales. El CSS administrativo es independiente. No hay dependencias nuevas ni SQL adicional para instalar.
+5. Ejecuta npm run build. Si falla, envía el error completo antes de publicar. Si funciona, npm run dev -- --port 3001.
+6. Prueba en localhost:3001 con una comunidad de prueba, no con Elden para eliminar.
+- Cambiar nombre y descripción; comprobar selector y cambio de comunidad.
+- Subir/reemplazar/quitar icono y portada. La portada se previsualiza en configuración; aún no se muestra como fondo general.
+- Crear, editar, cambiar categoría y orden numérico de canales; eliminar canal y categoría (elimina sus canales).
+- Generar, copiar y revocar invitación.
+- Con otra cuenta: asignar rol DM/admin, verificar restricciones; expulsar y volver con una invitación válida; abandonar.
+- Eliminar comunidad de prueba. La limpieza de Storage precede al borrado SQL y no es atómica; si falla el borrado SQL, las imágenes podrían haber desaparecido. Reintentar o subirlas de nuevo.
+- Verificar que perfil personal, navegación y módulos anteriores siguen funcionando.
+7. No publicar hasta verificar los permisos con cuentas distintas. No incluye chat, roles personalizados, transferencia de propiedad ni baneos permanentes.
+
+Verificación realizada: sintaxis TypeScript/TSX mediante transpileModule; no es una compilación completa de Next.js ni una prueba contra Supabase. Los archivos base locales no están todos disponibles en este entorno.
