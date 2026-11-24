@@ -1,410 +1,194 @@
+
 "use client";
 
-import { useState } from "react";
-import AuthGate from "@/components/AuthGate";
-import type { User as AuthUser } from "@supabase/supabase-js";
+import { useCallback, useEffect, useState } from "react";
+import type { User } from "@supabase/supabase-js";
+
 import {
-  Hash, Plus, Bell, Settings, Send,
-  ChevronDown, Users, ScrollText, CalendarDays,
-  Store, Backpack, Coins, BookOpen, Map,
-  Megaphone, Crown, User, Menu, Search,
-  Gem, Swords
+  Gem,
+  LoaderCircle,
+  RefreshCw,
 } from "lucide-react";
 
-const sections = [
-  {
-    title: "COMUNIDAD",
-    channels: [
-      { name: "anuncios", icon: Megaphone },
-      { name: "general", icon: Hash },
-      { name: "consultas", icon: Hash },
-      { name: "roleo", icon: Hash },
-    ],
-  },
-  {
-    title: "AVENTURAS",
-    channels: [
-      { name: "Misiones", icon: ScrollText },
-      { name: "Calendario", icon: CalendarDays },
-      { name: "Crónicas", icon: BookOpen },
-    ],
-  },
-  {
-    title: "PERSONAL",
-    channels: [
-      { name: "Personajes", icon: Users },
-      { name: "Mercado", icon: Store },
-      { name: "Inventario", icon: Backpack },
-      { name: "Tesorería", icon: Coins },
-    ],
-  },
-  {
-    title: "MUNDO",
-    channels: [
-      { name: "Enciclopedia", icon: BookOpen },
-      { name: "Mapas", icon: Map },
-    ],
-  },
-];
+import AuthGate from "@/components/AuthGate";
+import CommunitySelector from "@/components/CommunitySelector";
+import CommunityApp from "@/components/CommunityApp";
 
-const initialMessages = [
-  {
-    id: 1,
-    author: "Dungeon Master",
-    content: "¡Bienvenidos a Éxodo, aventureros!",
-    time: "18:30",
-    dm: true,
-  },
-  {
-    id: 2,
-    author: "Dungeon Master",
-    content: "Este será nuestro nuevo punto de encuentro para organizar aventuras y explorar nuevos mundos.",
-    time: "18:31",
-    dm: true,
-  },
-  {
-    id: 3,
-    author: "Aventurero",
-    content: "¿Hay alguna misión disponible?",
-    time: "18:35",
-    dm: false,
-  },
-];
+import { getCommunities } from "@/lib/communities";
+import type { Community } from "@/lib/communities";
 
-const chatChannels = [
-  "general", "anuncios", "consultas", "roleo"
-];
+// ==================================================
+// AUTENTICACIÓN PRINCIPAL
+// ==================================================
 
 export default function Home() {
   return (
     <AuthGate>
-      {(user) => <ExodoApp user={user} />}
+      {(user) => (
+        <ExodoApp key={user.id} user={user} />
+      )}
     </AuthGate>
   );
 }
 
-function ExodoApp({ user }: { user: AuthUser }) {
-  const displayName =
-    user.user_metadata.full_name ||
-    user.user_metadata.name ||
-    user.user_metadata.user_name ||
-    "Aventurero";
+// ==================================================
+// APLICACIÓN PRINCIPAL
+// ==================================================
 
-  const avatarUrl = user.user_metadata.avatar_url;
-  const [channel, setChannel] = useState("general");
-  const [input, setInput] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+function ExodoApp({ user }: { user: User }) {
+  const [communities, setCommunities] =
+    useState<Community[]>([]);
 
-  const [messages, setMessages] = useState<
-    Record<string, typeof initialMessages>
-  >({
-    general: initialMessages,
-    anuncios: [],
-    consultas: [],
-    roleo: [],
-  });
+  const [selectedCommunity, setSelectedCommunity] =
+    useState<Community | null>(null);
 
-  const isChat = chatChannels.includes(channel);
+  const [loading, setLoading] =
+    useState(true);
 
-  function sendMessage() {
-    if (!input.trim() || !isChat) return;
+  const [error, setError] =
+    useState("");
 
-    const message = {
-      id: Date.now(),
-      author: displayName,
-      content: input.trim(),
-      time: new Date().toLocaleTimeString("es-CL", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      dm: false,
-    };
+  // ==================================================
+  // CARGAR COMUNIDADES
+  // ==================================================
 
-    setMessages((previous) => ({
-      ...previous,
-      [channel]: [...(previous[channel] || []), message],
-    }));
+  const refreshCommunities = useCallback(
+    async (communityId?: string) => {
+      setError("");
 
-    setInput("");
+      const data = await getCommunities();
+
+      setCommunities(data);
+
+      if (communityId) {
+        const community = data.find(
+          (item) => item.id === communityId
+        );
+
+        if (community) {
+          setSelectedCommunity(community);
+        }
+      }
+    },
+    []
+  );
+
+  // ==================================================
+  // CARGA INICIAL
+  // ==================================================
+
+  const loadCommunities = useCallback(async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      await refreshCommunities();
+    } catch (err: unknown) {
+      setError(
+        err &&
+        typeof err === "object" &&
+        "message" in err
+          ? String(err.message)
+          : "No se pudieron cargar las comunidades."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [refreshCommunities]);
+
+  useEffect(() => {
+    void loadCommunities();
+  }, [loadCommunities]);
+
+  // ==================================================
+  // SELECCIONAR COMUNIDAD
+  // ==================================================
+
+  function selectCommunity(community: Community) {
+    setSelectedCommunity(community);
   }
 
-  return (
-    <div className="exodo">
+  function backToCommunities() {
+    setSelectedCommunity(null);
+  }
 
-      {/* Barra de comunidades */}
-      <aside className="communities">
-        <div className="brand">
-          <Gem size={27} />
-        </div>
+  // ==================================================
+  // PANTALLA DE CARGA
+  // ==================================================
 
-        <div className="community-divider" />
+  if (loading) {
+    return (
+      <div className="login-screen">
 
-        <button className="server active-server" title="Elden">
-          E
-        </button>
+        <Gem size={45} color="#c9b38a" />
 
-        <button className="server add-server" title="Crear comunidad" disabled>
-          <Plus size={22} />
-        </button>
+        <LoaderCircle
+          size={28}
+          className="loading-icon"
+        />
 
-        <div className="spacer" />
+        <p>Preparando tus comunidades...</p>
 
-        <button className="icon-button" title="Configuración" disabled>
-          <Settings size={20} />
-        </button>
-      </aside>
+      </div>
+    );
+  }
 
-      {/* Menú lateral */}
-      {sidebarOpen && (
-        <aside className="sidebar">
-          <div className="server-header">
-            <div>
-              <h2>Elden</h2>
-              <span>Comunidad de rol</span>
-            </div>
-            <ChevronDown size={17} />
-          </div>
+  // ==================================================
+  // PANTALLA DE ERROR
+  // ==================================================
 
-          <nav className="navigation">
-            {sections.map((section) => (
-              <div className="channel-group" key={section.title}>
-                <div className="group-title">
-                  {section.title}
-                </div>
+  if (error) {
+    return (
+      <div className="login-screen">
 
-                {section.channels.map((item) => {
-                  const Icon = item.icon;
+        <Gem size={45} color="#c9b38a" />
 
-                  return (
-                    <button
-                      key={item.name}
-                      className={`channel ${
-                        channel === item.name ? "selected" : ""
-                      }`}
-                      onClick={() => {
-                        setChannel(item.name);
-                        setInput("");
-                      }}
-                    >
-                      <Icon size={17} />
-                      <span>{item.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
-          </nav>
+        <div className="login-card">
 
-          <div className="profile">
-            <div className="avatar">
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt="Avatar de Discord"
-                  className="discord-avatar"
-                />
-              ) : (
-                <User size={19} />
-              )}
-              <span className="online-dot" />
-            </div>
+          <h2>No se pudo cargar Éxodo</h2>
 
-            <div className="profile-info">
-              <strong>{displayName}</strong>
-              <span>Cuenta de Discord</span>
-            </div>
+          <p>{error}</p>
 
-            <button className="icon-button" disabled>
-              <Settings size={17} />
-            </button>
-          </div>
-        </aside>
-      )}
-
-      {/* Contenido principal */}
-      <main className="main">
-        <header className="topbar">
           <button
-            className="icon-button"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="exodo-primary-button"
+            onClick={() => void loadCommunities()}
           >
-            <Menu size={20} />
+            <RefreshCw size={17} />
+            Reintentar
           </button>
 
-          {isChat ? <Hash size={20} /> : <Gem size={20} />}
-
-          <h1>{channel}</h1>
-
-          <div className="spacer" />
-
-          <span className="header-brand">É X O D O</span>
-
-          <button className="icon-button" title="Buscar" disabled>
-            <Search size={19} />
-          </button>
-
-          <button className="icon-button" title="Notificaciones" disabled>
-            <Bell size={19} />
-          </button>
-        </header>
-
-        {isChat ? (
-          <>
-            <div className="chat">
-
-              <div className="welcome">
-                <div className="welcome-icon">
-                  <Hash size={32} />
-                </div>
-
-                <h2>Bienvenido a #{channel}</h2>
-
-                <p>
-                  Este es el comienzo del canal #{channel}.
-                </p>
-              </div>
-
-              <div className="date-divider">
-                Inicio de la conversación
-              </div>
-
-              {(messages[channel] || []).map((message) => (
-                <div className="message" key={message.id}>
-
-                  <div className={`avatar ${message.dm ? "dm-avatar" : ""}`}>
-                    {message.dm ? (
-                      <Crown size={20} />
-                    ) : (
-                      <User size={20} />
-                    )}
-                  </div>
-
-                  <div className="message-body">
-                    <div className="message-header">
-                      <strong className={message.dm ? "dm-name" : ""}>
-                        {message.author}
-                      </strong>
-
-                      {message.dm && (
-                        <span className="dm-tag">DM</span>
-                      )}
-
-                      <time>{message.time}</time>
-                    </div>
-
-                    <p>{message.content}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <form
-              className="composer"
-              onSubmit={(event) => {
-                event.preventDefault();
-                sendMessage();
-              }}
-            >
-              <button type="button" className="icon-button" disabled>
-                <Plus size={21} />
-              </button>
-
-              <input
-                value={input}
-                onChange={(event) => setInput(event.target.value)}
-                placeholder={`Enviar mensaje a #${channel}`}
-              />
-
-              <button type="submit" className="send-button">
-                <Send size={19} />
-              </button>
-            </form>
-          </>
-        ) : (
-          <div className="module">
-
-            {channel === "Mercado" ? (
-              <>
-                <div className="module-heading">
-                  <div>
-                    <h2>Mercado de Elden</h2>
-                    <p>Objetos y equipamiento para tus aventuras.</p>
-                  </div>
-
-                  <div className="balance">
-                    <Coins size={20} /> 1.500 GP
-                  </div>
-                </div>
-
-                <div className="items-grid">
-                  {[
-                    {
-                      name: "Espada larga +1",
-                      rarity: "Uncommon",
-                      price: 500,
-                      icon: Swords,
-                    },
-                    {
-                      name: "Poción de curación",
-                      rarity: "Common",
-                      price: 50,
-                      icon: Backpack,
-                    },
-                    {
-                      name: "Iniciado en la Batalla",
-                      rarity: "Uncommon",
-                      price: 750,
-                      icon: Gem,
-                    },
-                  ].map((item) => (
-                    <div className="item-card" key={item.name}>
-                      <div className="item-icon">
-                        <item.icon size={36} />
-                      </div>
-
-                      <span className="rarity">{item.rarity}</span>
-                      <h3>{item.name}</h3>
-
-                      <div className="item-footer">
-                        <strong>{item.price} GP</strong>
-                        <button disabled>Comprar</button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <div className="empty-module">
-                <Gem size={42} />
-                <h2>{channel}</h2>
-                <p>Este módulo estará disponible próximamente.</p>
-              </div>
-            )}
-          </div>
-        )}
-      </main>
-
-      {/* Panel de miembros */}
-      <aside className="members">
-        <h3>DIRECTORES DE JUEGO — 1</h3>
-
-        <div className="member">
-          <div className="avatar dm-avatar">
-            <Crown size={18} />
-          </div>
-          <span className="dm-name">Dungeon Master</span>
         </div>
 
-        <h3>AVENTUREROS — 1</h3>
+      </div>
+    );
+  }
 
-        <div className="member">
-          <div className="avatar">
-            <User size={18} />
-          </div>
-          <span>Aventurero</span>
-        </div>
-      </aside>
+  // ==================================================
+  // COMUNIDAD SELECCIONADA
+  // ==================================================
 
-    </div>
+  if (selectedCommunity) {
+    return (
+      <CommunityApp
+        key={selectedCommunity.id}
+        user={user}
+        community={selectedCommunity}
+        communities={communities}
+        onSelectCommunity={selectCommunity}
+        onBack={backToCommunities}
+      />
+    );
+  }
+
+  // ==================================================
+  // SELECTOR DE COMUNIDADES
+  // ==================================================
+
+  return (
+    <CommunitySelector
+      communities={communities}
+      onSelect={selectCommunity}
+      onRefresh={refreshCommunities}
+    />
   );
 }
