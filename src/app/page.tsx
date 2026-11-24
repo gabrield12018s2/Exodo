@@ -1,7 +1,8 @@
-
 "use client";
 
 import { useState } from "react";
+import AuthGate from "@/components/AuthGate";
+import type { User as AuthUser } from "@supabase/supabase-js";
 import {
   Hash, Plus, Bell, Settings, Send,
   ChevronDown, Users, ScrollText, CalendarDays,
@@ -75,6 +76,21 @@ const chatChannels = [
 ];
 
 export default function Home() {
+  return (
+    <AuthGate>
+      {(user) => <ExodoApp user={user} />}
+    </AuthGate>
+  );
+}
+
+function ExodoApp({ user }: { user: AuthUser }) {
+  const displayName =
+    user.user_metadata.full_name ||
+    user.user_metadata.name ||
+    user.user_metadata.user_name ||
+    "Aventurero";
+
+  const avatarUrl = user.user_metadata.avatar_url;
   const [channel, setChannel] = useState("general");
   const [input, setInput] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -95,7 +111,7 @@ export default function Home() {
 
     const message = {
       id: Date.now(),
-      author: "Aventurero",
+      author: displayName,
       content: input.trim(),
       time: new Date().toLocaleTimeString("es-CL", {
         hour: "2-digit",
@@ -181,13 +197,21 @@ export default function Home() {
 
           <div className="profile">
             <div className="avatar">
-              <User size={19} />
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="Avatar de Discord"
+                  className="discord-avatar"
+                />
+              ) : (
+                <User size={19} />
+              )}
               <span className="online-dot" />
             </div>
 
             <div className="profile-info">
-              <strong>Aventurero</strong>
-              <span>Perfil de prueba</span>
+              <strong>{displayName}</strong>
+              <span>Cuenta de Discord</span>
             </div>
 
             <button className="icon-button" disabled>
