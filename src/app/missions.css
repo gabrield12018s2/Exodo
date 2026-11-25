@@ -1,0 +1,42 @@
+.ms-module{flex:1;min-height:0;overflow:auto;padding:24px;display:flex;flex-direction:column;gap:14px;color:var(--text,#dedee3)}.ms-module header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.ms-module h2,.ms-module h3,.ms-module p{margin:0}.ms-module small{color:var(--muted,#878b96)}.ms-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ms-module button,.ms-module input:not([type=checkbox]),.ms-module textarea,.ms-module select{font:inherit;color:inherit;background:#21232a;border:1px solid #363944;border-radius:7px;padding:9px;min-width:0;max-width:100%}.ms-module button{cursor:pointer}.ms-module button:disabled{opacity:.5;cursor:default}.ms-module .ms-primary{background:#c9b38a;color:#161616;font-weight:600}.ms-module .ms-selected{border-color:#c9b38a;color:#c9b38a}.ms-module .ms-danger,.ms-error{color:#efa4a4}.ms-notice{color:#8bc99c}.ms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));gap:14px}.ms-module .ms-card{padding:0;text-align:left;overflow:hidden;background:#191b21}.ms-card img{width:100%;height:150px;object-fit:cover}.ms-card>div{padding:15px;display:grid;gap:8px}.ms-card p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.ms-overlay{position:fixed;inset:0;background:#000b;z-index:1100;display:flex;align-items:center;justify-content:center;padding:16px}.ms-dialog{width:min(760px,100%);max-height:90vh;overflow:auto;background:#191b21;border:1px solid #363944;border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:14px}.ms-dialog label{display:flex;flex-direction:column;gap:5px}.ms-dialog .ms-inline{flex-direction:row;align-items:center}.ms-dialog textarea{min-height:90px;resize:vertical}.ms-dialog a{color:#c9b38a}.ms-banner{max-height:260px;width:100%;object-fit:contain}.ms-pre{white-space:pre-wrap;overflow-wrap:anywhere}.ms-panel{display:flex;flex-direction:column;gap:9px;border:1px solid #363944;background:#21232a;padding:12px;border-radius:8px}.ms-rewards{display:flex;flex-direction:column;gap:8px}.ms-rewards input[type=number]{width:130px}.ms-rewards select{max-width:100%}.ms-dialog .ms-error{white-space:pre-wrap}@media(max-width:600px){.ms-module,.ms-dialog{padding:12px}}
+
+/* v0.7.5.3 — toolbar shared by both mission views */
+.ms-module{gap:16px}
+.ms-page-heading h2{font-size:23px;font-weight:650;letter-spacing:-.025em;line-height:1.25}
+.ms-page-heading p{font-size:13px;color:var(--muted,#878b96);margin-top:5px}
+.ms-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:10px;background:var(--sidebar,#191b21);border:1px solid #30333c;border-radius:10px}
+.ms-tabs{display:flex;align-items:center;flex-wrap:wrap;gap:3px;padding:3px;background:var(--background,#141519);border-radius:8px}
+.ms-module .ms-tabs button{border:1px solid transparent;background:transparent;color:#a6a9b3;font-size:13px;font-weight:500;padding:8px 12px;white-space:nowrap;border-radius:6px;line-height:20px}
+.ms-module .ms-tabs button:hover{background:#24262e;color:#dedee3}
+.ms-module .ms-tabs button.ms-selected{background:#302c25;border-color:#514635;color:#d8c39b}
+.ms-filters{display:flex;align-items:center;gap:8px;flex:1 1 330px;justify-content:flex-end;min-width:0}
+.ms-dm-field,.ms-search-field{display:flex;align-items:center;gap:8px;border:1px solid #363944;border-radius:7px;background:#21232a;padding:0 10px;min-width:0;height:40px;color:#9296a2}
+.ms-dm-field{flex:0 1 175px}.ms-search-field{flex:0 1 245px}
+.ms-filters svg{width:17px;height:17px;flex:0 0 17px}
+.ms-module .ms-filters select,.ms-module .ms-filters input{background:transparent;border:0;border-radius:0;outline:none;padding:0;width:100%;font-size:13px;color:var(--text,#dedee3);height:100%;min-width:0}
+.ms-filters select{cursor:pointer;color-scheme:dark}.ms-filters select option{background:#21232a;color:#dedee3}
+.ms-dm-field:focus-within,.ms-search-field:focus-within{border-color:#a8926d;box-shadow:0 0 0 2px #c9b38a18}
+.ms-module .ms-search-field button{background:transparent;border:0;padding:0 3px;font-size:18px;color:#a6a9b3;line-height:1}
+.ms-module .ms-result-count{font-size:12px;color:#9296a2;margin-top:-5px}
+.ms-module .ms-card{transition:background .15s,border-color .15s;align-self:stretch}
+.ms-module .ms-card:hover{background:#202229}
+.ms-card h3{font-size:17px;font-weight:650;line-height:1.35;overflow-wrap:anywhere}
+.ms-card p{font-size:13px;line-height:1.5;color:#b3b5bf;overflow-wrap:anywhere}
+.ms-card small{font-size:12px;line-height:1.5}.ms-card strong{font-size:13px;color:#c9b38a}
+@media(max-width:700px){.ms-tabs{width:100%}.ms-module .ms-tabs button{flex:1 1 auto;padding:8px}.ms-filters{flex:1 1 100%;justify-content:stretch}.ms-dm-field,.ms-search-field{flex:1 1 0}}
+@media(max-width:390px){.ms-filters{flex-wrap:wrap}.ms-dm-field,.ms-search-field{flex:1 1 100%}}
+
+/* v0.7.5.4 — DM and participant portraits */
+.ms-dm-line{display:flex;align-items:center;gap:9px;min-width:0}
+.ms-avatar{position:relative;display:inline-flex;align-items:center;justify-content:center;flex:0 0 32px;width:32px;height:32px;border-radius:50%;overflow:hidden;background:#292c34;border:1px solid #454952;color:#c9b38a;font-size:11px;font-weight:650;line-height:1}
+.ms-module .ms-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;z-index:1}
+.ms-roster{border-top:1px solid #30333c;padding-top:10px;margin-top:4px;display:grid;gap:9px}
+.ms-roster-group{display:grid;gap:5px;min-width:0}
+.ms-roster-label{font-size:11px;font-weight:600;color:var(--ms-roster-color)}
+.ms-accepted{--ms-roster-color:#91c4a1;--ms-roster-border:#456a53;--ms-roster-bg:#25332b}
+.ms-pending{--ms-roster-color:#91b9e3;--ms-roster-border:#435e7d;--ms-roster-bg:#23303f}
+.ms-rejected{--ms-roster-color:#dfa1a5;--ms-roster-border:#75474b;--ms-roster-bg:#39282d}
+.ms-roster-people{display:flex;flex-wrap:wrap;gap:5px}
+.ms-person-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 7px 3px 3px;border-radius:20px;background:var(--ms-roster-bg);border:1px solid var(--ms-roster-border);color:var(--ms-roster-color);font-size:11px;max-width:100%;overflow-wrap:anywhere}
+.ms-person-chip .ms-avatar{width:23px;height:23px;flex-basis:23px;border-color:var(--ms-roster-border);font-size:9px}
+.ms-avatar-accepted{border-color:#56876b}.ms-avatar-pending{border-color:#537eac}.ms-avatar-rejected{border-color:#a45e63}

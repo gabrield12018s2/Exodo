@@ -6,6 +6,7 @@ import { saveNavigationOrder } from "@/lib/communityAdmin";
 import type { User as AuthUser } from "@supabase/supabase-js";
 
 import {
+  Trophy,
   Gem,
   Hash,
   Plus,
@@ -52,6 +53,13 @@ import type {
   Profile,
 } from "@/lib/communities";
 
+import { Ranking } from "@/components/characters/Equipment";
+import DmRanking from "@/components/missions/DmRanking";
+import Missions from "@/components/missions/Missions";
+import Characters from "@/components/characters/Characters";
+import Guide from "@/components/guide/Guide";
+import Market from "@/components/market/Market";
+import Treasury from "@/components/economy/Treasury";
 import InviteModal from "@/components/InviteModal";
 import ProfileModal from "@/components/ProfileModal";
 import CommunitySettings, { type Section } from "@/components/settings/CommunitySettings";
@@ -65,12 +73,17 @@ const channelIcons = {
   announcement: Megaphone,
   forum: MessageSquare,
   missions: ScrollText,
+  mission_publish: Megaphone,
   calendar: CalendarDays,
   characters: Users,
+  ranking: Trophy,
+  dm_ranking: Trophy,
   shop: Store,
+  general_shop: Store,
   inventory: Backpack,
   treasury: Coins,
   wiki: BookOpen,
+  guide: BookOpen,
   maps: Map,
   chronicles: BookOpen,
   voice_link: Headphones,
@@ -88,11 +101,16 @@ const moduleDescriptions: Record<ChannelType, string> = {
   announcement: "Anuncios oficiales de la comunidad.",
   forum: "Publicaciones y discusiones.",
   missions: "Explora las aventuras disponibles.",
+  mission_publish: "Crea y publica tus aventuras.",
   calendar: "Organiza tus próximas partidas.",
   characters: "Administra tus personajes.",
+  ranking: "Clasificación por valor de equipamiento.",
+  dm_ranking: "Misiones completadas y recompensas entregadas.",
   shop: "Compra objetos y equipamiento.",
+  general_shop: "Explora los catálogos de la Tienda General.",
   inventory: "Consulta tus objetos adquiridos.",
   treasury: "Administra tu oro y transacciones.",
+  guide: "Conoce cómo funciona la comunidad.",
   wiki: "Descubre las historias y reglas del mundo.",
   maps: "Explora las regiones de la campaña.",
   chronicles: "Revive las aventuras de la comunidad.",
@@ -228,6 +246,7 @@ export default function CommunityApp({
         setRole(myRole);
 
         const defaultChannel =
+          channelData.find(channel => channel.type === "guide") ||
           channelData.find(
             (channel) =>
               channel.name === "general" &&
@@ -274,7 +293,7 @@ export default function CommunityApp({
   async function refreshSettings() {
     const [cats, chans, people, currentRole] = await Promise.all([getCategories(community.id), getChannels(community.id), getCommunityMembers(community.id), getMyRole(community.id)]);
     setCategories(cats); setChannels(chans); setMembers(people); setRole(currentRole);
-    setSelectedChannel(old => chans.find(c => c.id === old?.id) || chans.find(c => c.type === 'text') || chans[0] || null);
+    setSelectedChannel(old => chans.find(c => c.id === old?.id) || chans.find(c => c.type === 'guide') || chans.find(c => c.type === 'text') || chans[0] || null);
   }
   function toggleCategory(categoryId: string) {
     setCollapsedCategories((previous) =>
@@ -557,7 +576,7 @@ export default function CommunityApp({
 
                 {/* CATEGORÍAS PERSONALIZADAS */}
 
-                {categories.map((category) => {
+                {categories.filter(category => role !== "player" || !["ADMINISTRACIÓN", "ADMINISTRACION"].includes(category.name.trim().toUpperCase()) || channels.some(ch => ch.category_id === category.id)).map((category) => {
 
                   const collapsed =
                     collapsedCategories.includes(
@@ -744,6 +763,20 @@ export default function CommunityApp({
 
           </div>
 
+        ) : selectedChannel.type === "guide" && role ? (
+          <Guide key={`${community.id}:${user.id}`} communityId={community.id} role={role} />
+        ) : selectedChannel.type === "dm_ranking" && role && role !== "player" ? (
+          <DmRanking key={community.id} communityId={community.id} />
+        ) : selectedChannel.type === "ranking" && role ? (
+          <Ranking key={`${community.id}:${user.id}`} communityId={community.id} userId={user.id} />
+        ) : (selectedChannel.type === "missions" || selectedChannel.type === "mission_publish") && role ? (
+          <Missions key={`${community.id}:${user.id}:${selectedChannel.type}`} mode={selectedChannel.type === "mission_publish" ? "publish" : "available"} communityId={community.id} userId={user.id} role={role} members={members} />
+        ) : selectedChannel.type === "characters" && role ? (
+          <Characters key={`${community.id}:${user.id}`} communityId={community.id} userId={user.id} role={role} members={members} />
+        ) : (selectedChannel.type === "shop" || selectedChannel.type === "general_shop" || selectedChannel.type === "inventory") && role ? (
+          <Market key={`${community.id}:${user.id}:${selectedChannel.type}`} communityId={community.id} userId={user.id} role={role} members={members} mode={selectedChannel.type} />
+        ) : selectedChannel.type === "treasury" && role === "owner" ? (
+          <Treasury key={`${community.id}:${user.id}`} communityId={community.id} userId={user.id} role={role} members={members} />
         ) : isChat ? (
 
           <>
@@ -776,8 +809,7 @@ export default function CommunityApp({
                 <MessageSquare size={26} />
 
                 <p>
-                  El chat en tiempo real estará
-                  disponible en Éxodo v0.4.
+                  Utiliza Discord para conversar. El chat de Éxodo queda para una etapa posterior.
                 </p>
 
               </div>

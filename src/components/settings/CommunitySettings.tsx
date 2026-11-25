@@ -7,7 +7,7 @@ import * as api from '@/lib/communityAdmin';
 export type Section='general'|'appearance'|'channels'|'members'|'roles'|'invites'|'danger';
 const labels:Record<Section,string>={general:'Información general',appearance:'Personalización',channels:'Canales y categorías',members:'Miembros',roles:'Roles y permisos',invites:'Invitaciones',danger:'Salir o eliminar'};
 const roles:Record<CommunityRole,string>={owner:'Propietario',admin:'Administrador',dm:'Dungeon Master',player:'Aventurero'};
-const types:ChannelType[]=['text','announcement','forum','missions','calendar','characters','shop','inventory','treasury','wiki','maps','chronicles','voice_link'];
+const types: ChannelType[] = ['text', 'announcement', 'forum', 'missions', 'calendar', 'characters', 'shop', 'inventory', 'treasury', 'wiki', 'maps', 'chronicles', 'voice_link', 'ranking', 'mission_publish', 'dm_ranking', 'general_shop', 'guide'];
 interface Props {community:Community;categories:Category[];channels:Channel[];members:CommunityMember[];role:CommunityRole;userId:string;initial:Section;onClose:()=>void;onRefresh:()=>Promise<void>;onCommunity:(c:Community)=>void;onExit:()=>void}
 export default function CommunitySettings(p:Props){
  const owner=p.role==='owner',admin=owner||p.role==='admin';
