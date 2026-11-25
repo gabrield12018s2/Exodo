@@ -1,7 +1,7 @@
 import {createClient} from '@/lib/supabase/client';
 export type StoreKind='market'|'general';
 export type Category={store_kind?:StoreKind;id:string;name:string;parent_id:string|null;description:string;position:number};
-export type Item={store_kind?:StoreKind;id:string;community_id:string;category_id:string|null;name:string;description:string;image_url:string|null;rarity:string;price:number;stock:number|null;is_visible:boolean;is_archived:boolean;is_consumable:boolean;purchase_mode:'automatic'|'approval'};
+export type Item={armor_parent_id?:string|null;armor_base_code?:string|null;store_kind?:StoreKind;id:string;community_id:string;category_id:string|null;name:string;description:string;image_url:string|null;rarity:string;price:number;stock:number|null;is_visible:boolean;is_archived:boolean;is_consumable:boolean;purchase_mode:'automatic'|'approval'};
 export type Order={id:string;buyer_id:string;item_id:string;item_name:string;quantity:number;unit_price:number;total_price:number;status:string;created_at:string;review_note:string|null};
 export type InventoryRow={id:string;user_id:string;item_id:string;quantity:number};
 export type Movement={id:string;quantity_change:number;quantity_after:number;transaction_type:string;reason:string;created_at:string};
