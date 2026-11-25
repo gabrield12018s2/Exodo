@@ -445,9 +445,11 @@ export default function CommunityApp({
 
         <button
           className="brand"
+          style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, flexShrink: 0 }}
           onClick={backToSelector}
           title="Mis comunidades"
         >
+          <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: "0.12em", lineHeight: 1, whiteSpace: "nowrap" }}>ÉXODO</span>
           <Gem size={27} />
         </button>
 
@@ -694,10 +696,6 @@ export default function CommunityApp({
           </h1>
 
           <div className="spacer" />
-
-          <span className="header-brand">
-            É X O D O
-          </span>
 
           <button
             className="icon-button"
