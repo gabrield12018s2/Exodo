@@ -60,6 +60,7 @@ import Characters from "@/components/characters/Characters";
 import Guide from "@/components/guide/Guide";
 import Market from "@/components/market/Market";
 import Treasury from "@/components/economy/Treasury";
+import { OfficialButton } from "@/components/official/OfficialPanel";
 import InviteModal from "@/components/InviteModal";
 import ProfileModal from "@/components/ProfileModal";
 import CommunitySettings, { type Section } from "@/components/settings/CommunitySettings";
@@ -453,6 +454,7 @@ export default function CommunityApp({
           <Gem size={27} />
         </button>
 
+        <OfficialButton />
         <div className="community-divider" />
 
         {communities.map((original) => { const item = original.id === community.id ? community : original; return (
